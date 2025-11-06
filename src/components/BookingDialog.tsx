@@ -14,6 +14,24 @@ interface BookingDialogProps {
   userPhone: string;
 }
 
+const cities = [
+  'Москва',
+  'Санкт-Петербург',
+  'Казань',
+  'Сочи',
+  'Екатеринбург',
+  'Новосибирск',
+  'Владивосток',
+  'Иркутск',
+  'Краснодар',
+  'Самара',
+  'Нижний Новгород',
+  'Калининград',
+  'Мурманск',
+  'Хабаровск',
+  'Уфа'
+];
+
 const mockFlights: Flight[] = [
   {
     id: '1',
@@ -41,11 +59,47 @@ const mockFlights: Flight[] = [
     time: '09:15',
     price: 7800,
     availableSeats: ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B', '5A', '5B']
+  },
+  {
+    id: '4',
+    from: 'Москва (SVO)',
+    to: 'Екатеринбург (SVX)',
+    date: '2025-11-18',
+    time: '08:45',
+    price: 6200,
+    availableSeats: ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B']
+  },
+  {
+    id: '5',
+    from: 'Санкт-Петербург (LED)',
+    to: 'Владивосток (VVO)',
+    date: '2025-11-19',
+    time: '12:00',
+    price: 18500,
+    availableSeats: ['1A', '1B', '2A', '2B', '3A', '3B']
+  },
+  {
+    id: '6',
+    from: 'Новосибирск (OVB)',
+    to: 'Москва (DME)',
+    date: '2025-11-20',
+    time: '15:30',
+    price: 12000,
+    availableSeats: ['1A', '1B', '2A', '2B', '3A', '3B', '4A', '4B']
+  },
+  {
+    id: '7',
+    from: 'Краснодар (KRR)',
+    to: 'Калининград (KGD)',
+    date: '2025-11-21',
+    time: '07:20',
+    price: 8900,
+    availableSeats: ['1A', '1B', '2A', '2B', '3A', '3B']
   }
 ];
 
 const BookingDialog = ({ isOpen, onClose, onBook, userPhone }: BookingDialogProps) => {
-  const [step, setStep] = useState<'search' | 'select-seat' | 'confirm'>('search');
+  const [step, setStep] = useState<'search' | 'flight-details' | 'select-seat' | 'confirm'>('search');
   const [selectedFlight, setSelectedFlight] = useState<Flight | null>(null);
   const [selectedSeat, setSelectedSeat] = useState('');
   const [passengerName, setPassengerName] = useState('');
@@ -60,7 +114,7 @@ const BookingDialog = ({ isOpen, onClose, onBook, userPhone }: BookingDialogProp
     
     if (flight) {
       setSelectedFlight(flight);
-      setStep('select-seat');
+      setStep('flight-details');
     }
   };
 
@@ -110,8 +164,9 @@ const BookingDialog = ({ isOpen, onClose, onBook, userPhone }: BookingDialogProp
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold">
             {step === 'search' && 'Поиск рейса'}
+            {step === 'flight-details' && 'Информация о рейсе'}
             {step === 'select-seat' && 'Выбор места'}
-            {step === 'confirm' && 'Подтверждение и оплата'}
+            {step === 'confirm' && 'Подтверждение бронирования'}
           </DialogTitle>
         </DialogHeader>
 
@@ -125,9 +180,9 @@ const BookingDialog = ({ isOpen, onClose, onBook, userPhone }: BookingDialogProp
                     <SelectValue placeholder="Выберите город" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Москва">Москва</SelectItem>
-                    <SelectItem value="Санкт-Петербург">Санкт-Петербург</SelectItem>
-                    <SelectItem value="Казань">Казань</SelectItem>
+                    {cities.map(city => (
+                      <SelectItem key={city} value={city}>{city}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -139,9 +194,9 @@ const BookingDialog = ({ isOpen, onClose, onBook, userPhone }: BookingDialogProp
                     <SelectValue placeholder="Выберите город" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Санкт-Петербург">Санкт-Петербург</SelectItem>
-                    <SelectItem value="Казань">Казань</SelectItem>
-                    <SelectItem value="Сочи">Сочи</SelectItem>
+                    {cities.map(city => (
+                      <SelectItem key={city} value={city}>{city}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -161,6 +216,52 @@ const BookingDialog = ({ isOpen, onClose, onBook, userPhone }: BookingDialogProp
             <Button onClick={handleSearchFlights} className="w-full" size="lg">
               <Icon name="Search" className="mr-2" size={20} />
               Найти рейсы
+            </Button>
+          </div>
+        )}
+
+        {step === 'flight-details' && selectedFlight && (
+          <div className="space-y-6 mt-4">
+            <div className="bg-gradient-to-r from-primary/10 to-secondary/10 p-6 rounded-lg space-y-4">
+              <div className="flex items-center gap-3">
+                <Icon name="Plane" className="text-primary" size={32} />
+                <div>
+                  <h3 className="text-2xl font-bold">{selectedFlight.from} → {selectedFlight.to}</h3>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div className="flex items-center gap-2">
+                  <Icon name="Calendar" className="text-primary" size={20} />
+                  <div>
+                    <div className="text-muted-foreground">Дата вылета</div>
+                    <div className="font-medium">{selectedFlight.date}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Icon name="Clock" className="text-primary" size={20} />
+                  <div>
+                    <div className="text-muted-foreground">Время вылета</div>
+                    <div className="font-medium">{selectedFlight.time}</div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-4 border-t">
+                <div className="text-3xl font-bold text-primary">
+                  {selectedFlight.price} ₽
+                </div>
+                <div className="text-sm text-muted-foreground">Цена за 1 пассажира</div>
+              </div>
+            </div>
+
+            <Button 
+              onClick={() => setStep('select-seat')} 
+              className="w-full" 
+              size="lg"
+            >
+              <Icon name="Armchair" className="mr-2" size={20} />
+              Выбрать место
             </Button>
           </div>
         )}
@@ -207,7 +308,7 @@ const BookingDialog = ({ isOpen, onClose, onBook, userPhone }: BookingDialogProp
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setStep('search')} className="flex-1">
+              <Button variant="outline" onClick={() => setStep('flight-details')} className="flex-1">
                 Назад
               </Button>
               <Button 
@@ -215,7 +316,7 @@ const BookingDialog = ({ isOpen, onClose, onBook, userPhone }: BookingDialogProp
                 className="flex-1"
                 disabled={!selectedSeat || !passengerName}
               >
-                Бронировать
+                Подтвердить бронирование
               </Button>
             </div>
           </div>
